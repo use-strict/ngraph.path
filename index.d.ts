@@ -8,6 +8,10 @@ import { Graph, Link, Node, NodeId } from "ngraph.graph"
 declare module "ngraph.path" {
 
 
+    interface AStarPathFinderOptions<NodeData, LinkData> extends PathFinderOptions<NodeData, LinkData> {
+        /** If there is no available path, return the path to the best closest node relative to the target */
+        bestEffort?: boolean
+    }
     interface PathFinderOptions<NodeData, LinkData> {
         oriented?: boolean
         quitFast?: boolean
@@ -19,9 +23,9 @@ declare module "ngraph.path" {
         find: (from: NodeId, to: NodeId) => Node<NodeData>[]
     }
 
-    export function aStar<NodeData, LinkData>(graph: Graph<NodeData, LinkData>, options?: PathFinderOptions<NodeData, LinkData>): PathFinder<NodeData>
+    export function aStar<NodeData, LinkData>(graph: Graph<NodeData, LinkData>, options?: AStarPathFinderOptions<NodeData, LinkData>): PathFinder<NodeData>
 
-    export function aGreedy<NodeData, LinkData>(graph: Graph<NodeData, LinkData>, options?: PathFinderOptions<NodeData, LinkData>): PathFinder<NodeData>
+    export function aGreedy<NodeData, LinkData>(graph: Graph<NodeData, LinkData>, options?: AStarPathFinderOptions<NodeData, LinkData>): PathFinder<NodeData>
 
     export function nba<NodeData, LinkData>(graph: Graph<NodeData, LinkData>, options?: PathFinderOptions<NodeData, LinkData>): PathFinder<NodeData>
 

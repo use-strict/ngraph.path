@@ -293,3 +293,66 @@ function manhattanFromData() {
     return aStar.l1(fromPos, toPos);
   }
 }
+
+
+test('A* can find path to closest node', t => {
+  let graph = createGraph();
+
+  graph.addNode('a', { x: 0, y: 0});
+  graph.addNode('b', { x: 2, y: 2});
+  graph.addNode('c', { x: 2, y: 1});
+  graph.addNode('d', { x: 3, y: 0});
+  graph.addLink('a', 'b');
+  graph.addLink('a', 'c');
+
+
+  var pathFinder = aStar(graph, {
+    bestEffort: true,
+    distance(a, b) {
+      let dx = a.data.x - b.data.x;
+      let dy = a.data.y - b.data.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    },
+    heuristic(a, b) {
+      let dx = a.data.x - b.data.x;
+      let dy = a.data.y - b.data.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+  });
+  let path = pathFinder.find('a', 'd');
+
+  t.equals(path[0].id, 'c', 'c is here');
+  t.equals(path[1].id, 'a', 'a is here');
+  t.end();
+});
+
+test('A* greedy can find path to closest node', t => {
+  let graph = createGraph();
+
+  graph.addNode('a', { x: 0, y: 0});
+  graph.addNode('b', { x: 2, y: 2});
+  graph.addNode('c', { x: 2, y: 1});
+  graph.addNode('d', { x: 3, y: 0});
+  graph.addLink('a', 'b');
+  graph.addLink('a', 'c');
+
+
+  var pathFinder = aGreedy(graph, {
+    bestEffort: true,
+    distance(a, b) {
+      let dx = a.data.x - b.data.x;
+      let dy = a.data.y - b.data.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    },
+    heuristic(a, b) {
+      let dx = a.data.x - b.data.x;
+      let dy = a.data.y - b.data.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+  });
+  let path = pathFinder.find('a', 'd');
+
+  t.equals(path[0].id, 'c', 'c is here');
+  t.equals(path[1].id, 'a', 'a is here');
+  t.end();
+});

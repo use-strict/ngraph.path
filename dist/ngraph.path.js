@@ -164,6 +164,8 @@ function aStarBi(graph, options) {
   options = options || {};
   // whether traversal should be considered over oriented graph.
   var oriented = options.oriented;
+  // if no path is possible, should we instead return a path to the node that's closest to the target?
+  var bestEffort = options.bestEffort;
 
   var heuristic = options.heuristic;
   if (!heuristic) heuristic = defaultSettings.heuristic;
@@ -228,8 +230,10 @@ function aStarBi(graph, options) {
     var currentSet = openSetFrom;
     var currentOpener = BY_FROM;
 
-    while (openSetFrom.length > 0 && openSetTo.length > 0) {
-      if (openSetFrom.length < openSetTo.length) {
+    var closestState = startNode;
+
+    while (openSetFrom.length > 0 && (openSetTo.length > 0 || bestEffort)) {
+      if (openSetFrom.length < openSetTo.length || (!openSetTo.length && bestEffort)) {
         // we pick a set with less elements
         currentOpener = BY_FROM;
         currentSet = openSetFrom;
@@ -254,7 +258,7 @@ function aStarBi(graph, options) {
       }
     }
 
-    return NO_PATH; // No path.
+    return !bestEffort ? NO_PATH : reconstructBiDirectionalPath(closestState);
 
     function nonOrientedVisitor(otherNode, link) {
       return visitNode(otherNode, link, current);
@@ -349,6 +353,10 @@ function aStarBi(graph, options) {
       // bingo! we found shorter path:
       otherSearchState.parent = cameFrom;
       otherSearchState.distanceToSource = tentativeDistance;
+
+      if (target === to && newFScore - tentativeDistance < closestState.fScore - closestState.distanceToSource) {
+        closestState = otherSearchState;
+      }
     }
   }
 }
@@ -393,6 +401,8 @@ function aStarPathSearch(graph, options) {
   options = options || {};
   // whether traversal should be considered over oriented graph.
   var oriented = options.oriented;
+  // if no path is possible, should we instead return a path to the node that's closest to the target?
+  var bestEffort = options.bestEffort;
 
   var heuristic = options.heuristic;
   if (!heuristic) heuristic = defaultSettings.heuristic;
@@ -438,6 +448,7 @@ function aStarPathSearch(graph, options) {
     startNode.open = 1;
 
     var cameFrom;
+    var closestState = startNode;
 
     while (openSet.length > 0) {
       cameFrom = openSet.pop();
@@ -449,7 +460,7 @@ function aStarPathSearch(graph, options) {
     }
 
     // If we got here, then there is no path.
-    return NO_PATH;
+    return !bestEffort ? NO_PATH : reconstructPath(closestState);
 
     function visitNeighbour(otherNode, link) {
       var otherSearchState = nodeState.get(otherNode.id);
@@ -478,6 +489,10 @@ function aStarPathSearch(graph, options) {
       otherSearchState.parent = cameFrom;
       otherSearchState.distanceToSource = tentativeDistance;
       otherSearchState.fScore = tentativeDistance + heuristic(otherSearchState.node, to);
+
+      if (otherSearchState.fScore - otherSearchState.distanceToSource < closestState.fScore - closestState.distanceToSource) {
+        closestState = otherSearchState;
+      }
 
       openSet.updateItem(otherSearchState.heapIndex);
     }
