@@ -356,3 +356,39 @@ test('A* greedy can find path to closest node', t => {
   t.equals(path[1].id, 'a', 'a is here');
   t.end();
 });
+
+test('A* bails out when node limit is exceeded', t => {
+  let graph = createGraph();
+
+  graph.addNode('a', { x: 0, y: 0});
+  graph.addNode('b', { x: 2, y: 2});
+  graph.addNode('c', { x: 2, y: 1});
+  graph.addNode('d', { x: 3, y: 0});
+  graph.addLink('a', 'b');
+  graph.addLink('a', 'c');
+  graph.addLink('c', 'd');
+
+  [
+    [1, 0, "no path found when limit is 1"],
+    [2, 3, "path found when limit is 2"]
+  ].forEach(([maxExpandedNodes, expectedPathLength, message]) => {
+
+    var pathFinder = aStar(graph, {
+      maxExpandedNodes,
+      distance(a, b) {
+        let dx = a.data.x - b.data.x;
+        let dy = a.data.y - b.data.y;
+        return Math.sqrt(dx * dx + dy * dy);
+      },
+      heuristic(a, b) {
+        let dx = a.data.x - b.data.x;
+        let dy = a.data.y - b.data.y;
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+    });
+    let path = pathFinder.find('a', 'd');
+
+    t.equals(path.length, expectedPathLength, message);
+  });
+  t.end();
+});

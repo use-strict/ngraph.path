@@ -11,6 +11,8 @@ declare module "ngraph.path" {
     interface AStarPathFinderOptions<NodeData, LinkData> extends PathFinderOptions<NodeData, LinkData> {
         /** If there is no available path, return the path to the best closest node relative to the target */
         bestEffort?: boolean
+        /** Maximum number of nodes to expand/visit from source */
+        maxExpandedNodes?: number
     }
     interface PathFinderOptions<NodeData, LinkData> {
         oriented?: boolean
