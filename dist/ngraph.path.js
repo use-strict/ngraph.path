@@ -403,6 +403,8 @@ function aStarPathSearch(graph, options) {
   var oriented = options.oriented;
   // if no path is possible, should we instead return a path to the node that's closest to the target?
   var bestEffort = options.bestEffort;
+  // Breaks execution when we visited more than this many nodes
+  var maxExpandedNodes = options.maxExpandedNodes || Number.POSITIVE_INFINITY;
 
   var heuristic = options.heuristic;
   if (!heuristic) heuristic = defaultSettings.heuristic;
@@ -449,10 +451,16 @@ function aStarPathSearch(graph, options) {
 
     var cameFrom;
     var closestState = startNode;
+    var expandedNodes = 0;
 
     while (openSet.length > 0) {
       cameFrom = openSet.pop();
       if (goalReached(cameFrom, to)) return reconstructPath(cameFrom);
+
+      expandedNodes++;
+      if (expandedNodes > maxExpandedNodes) {
+        break;
+      }
 
       // no need to visit this node anymore
       cameFrom.closed = true;
